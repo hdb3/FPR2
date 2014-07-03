@@ -1,0 +1,15 @@
+Router processes require to be able to discover globally distinct objects like network interfaces.
+This document described how this can be done.
+Each router process has it's own configuration, which is expected to include a list of connected interfaces and possibly some specific configuration for the interface, e.g. whether or not it is a broadcast interface.  So a router should be able to completely specify the type of object it requires, however it may not be able to identify the instance of the object which will be connected to by the correct peer.  There are two possible solutions to this:
+1) the router configuration should include a globally unique name for each interface
+2) the router configuration uses locally significant names (or numbers), and there is a separate global register which contains mappings from router instances to associated interfaces.
+
+The first option is simpler, however it depends on more complex configuration for the individual routers, based on an external global network configuration.  The second option could allow router instances to have only a common generic configuration, however it demands that a network configuration language be implmented for even a very simple case.
+
+The proposed solution is option 1, ideally built to allow a later more complex implmentation without too much change to existing code or configs.
+
+Option 1 - Definition
+A client router requires to acquire a network interface, knowing the globally unique name of the interface and also what type of interface is required.  The service interface is a function taking a name and returning an object of the required type.
+Implementation
+A global dictionary is required, which shall contain all of the created objects and their values: when an object is requested for the first time then the dictionary entry is created; subsequent requests return the already created object.
+Note: if the system is to support more than one type of object then some more work is probably needed...

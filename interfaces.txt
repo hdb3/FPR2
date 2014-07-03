@@ -1,0 +1,17 @@
+Interfaces are bidirectional or more interchange points for network messages.
+An interface may support queueing of messages, however the underlying implementation is hidden from the client,
+and exposed as a functional interface in the IO monad, analogous to MVars.
+An interface is a plain Haskell value which supports send and receive operations.
+Point-to-point interfaces allow only two attached clients, and ensure that messages sent by one party are only received by the other (client does not see it's own traffic reflected), and messages are delivered in strict order of sending.  There is no interaction between message traffic in the two directions.
+A simple protocol is adopted to ensure that the two clients correctly acquire the correct distinct send and receive half-interfaces.  This protocol also allows the clients to discover whether a peer has connected to the interface, and if required, to wait on connection and disconnection events from the peer.
+The interface is constructed from two uni-directional half-interfaces, whose behaviour is detailed now.
+A half-interface supports send and receive operations, both of which are potentially blocking, however send will only block under exceptional conditions, so that coding to manage send blocking should not be neccessary.  Receive operations will often block.
+
+Broadcast Interfaces
+In use a broadcast interface offers the same service as the point-to-point interface, i.e. send and receive, however the message payload for these interfaces must provide a method to discover the source address ('MAC' address) of the sender.  Additionally, the send operation operates on messages which provide a method for setting the explicit destination peer of a message.  These two requirements are sufficient to implement an effective ARP system.  The interface address is an opaque type which guarantees a globally unique value for every interface end-point.
+
+Use
+Interfaces are intended to represent delineations between autonomous processes (emulated routers).  This is especially relevant for multi-point/broadcast interfaces, which require support of endpoint indentification ( e.g. ARP) to allow message delivery to specific peers on a shared interface. The same mechanism however (especially pt-to-pt) may of use within a router instance, however some extended aspects of interfaces (e.g.  external administrative control, simulated message loss or delay) may not be relavant.  Hence the underlying obects will be implmented for generic use, and the specific external network interface defined seprately, although the underlying implmentation may be identical.
+
+Assignment and Discovery of Network Interfaces
+It is expected that network interfaces would not be created dynamically once an emulation has started execution and completed initialiasation, however the mechanism for configuring interfaces onto distinct router processes is disctinct from the operations available once an interface has been accquired.  Therefore, a separate resource discovery prtocol capable of supplying network interfaces as values must be provided - see seprate design doc.
